@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/test_connecter.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:web3dart/crypto.dart';
@@ -79,16 +80,19 @@ class _WalletPageState extends State<WalletPage> {
   Future<void> xmtpC() async {
     var wallet = asSigner();
     var api = xmtp.Api.create();
+    final mySecureStorage = const FlutterSecureStorage();
+    widget.connector.openWalletApp();
+
+    // ignore: unused_local_variable
+
     xmtp.Client? client =
-        await xmtp.Client.createFromWallet(api, wallet).then((value) {
-      print(value.keys.preKeys[0].privateKey);
+        await xmtp.Client.createFromWallet(api, wallet).then((value) async {
+      await mySecureStorage.write(
+          //Saving the keys into Local Storage
+          key: "xmtp.keys",
+          value: value.keys.writeToJson());
+      debugPrint(value.keys.toString());
     }).timeout(const Duration(seconds: 120));
-
-    //TO DO
-    //
-    //Store the XMTP Data into storage
-
-    // await mySecureStorage.save(client.keys.writeToBuffer());
 
     //NAVIGATING TO NEXT PAGE
     Navigator.of(context).push(
@@ -99,6 +103,8 @@ class _WalletPageState extends State<WalletPage> {
       ),
     );
   }
+
+  // late xmtp.PrivateKeyBundle x = xmtp.PrivateKeyBundle();
 
   //Copying the Address to clipboard
   void copyAddressToClipboard() {
