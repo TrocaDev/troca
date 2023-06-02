@@ -9,6 +9,8 @@ abstract class TestConnector {
     required double amount,
   });
 
+  WalletConnect getWalletConnect();
+
   Future<bool> openWalletApp();
 
   Future<double> getBalance();

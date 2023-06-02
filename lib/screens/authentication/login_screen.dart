@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:troca/models/wallet.dart';
 
 import '../../models/ethereum_connecter.dart';
 import '../../models/test_connecter.dart';
@@ -29,6 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
   ConnectionState _state = ConnectionState.Disconnected;
   String? _networkName = _networks.first;
 
+  //INIT FOR
   @override
   void initState() {
     connector.registerListeners(
@@ -44,6 +46,7 @@ class _AuthScreenState extends State<AuthScreen> {
     super.initState();
   }
 
+  //UI FOR LOGIN SCREEN
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,6 +115,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  //TRANSACTION LIST
   String _transactionStateToString({required ConnectionState state}) {
     switch (state) {
       case ConnectionState.Disconnected:
@@ -127,17 +131,18 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // NAVIGATE TO NEXT PAGE
   void _openWalletPage() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const Scaffold(
-            body: Center(
-          child: Text("WALLET CONNECTED"),
-        )),
+        builder: (context) => WalletPage(
+          connector: connector,
+        ),
       ),
     );
   }
 
+  // AUTHENTICATE DAPP USING WALLETS(METAMASK)
   VoidCallback? _transactionStateToAction(BuildContext context,
       {required ConnectionState state}) {
     debugPrint('State: ${_transactionStateToString(state: state)}');
@@ -164,6 +169,7 @@ class _AuthScreenState extends State<AuthScreen> {
             });
 
             if (session != null) {
+              debugPrint("SESSION EXISTED");
               setState(() => _state = ConnectionState.connected);
               Future.delayed(Duration.zero, () => _openWalletPage());
             } else {
@@ -180,6 +186,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // CHANGE IN NETWORK(CURRENTLY ONLY ETHEREUM NETWORK)
   void _changeNetwork(String? network) {
     if (network == null || _networkName == network) return;
 
@@ -189,11 +196,12 @@ class _AuthScreenState extends State<AuthScreen> {
       case 0:
         connector = EthereumTestConnector();
         break;
-      case 1:
+      default:
         connector = EthereumTestConnector();
         break;
     }
 
+    // DISCONNECT NETWORK
     setState(
       () {
         _networkName = network;

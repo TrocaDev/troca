@@ -60,7 +60,7 @@ class EthereumTestConnector implements TestConnector {
         bridge: 'https://bridge.walletconnect.org',
         clientMeta: const PeerMeta(
           // <-- Meta data of your app appearing in the wallet when connecting
-          name: 'QRCodeModalExampleApp',
+          name: 'Troca',
           description: 'WalletConnect Developer App',
           url: 'https://walletconnect.org',
           icons: [
@@ -128,6 +128,10 @@ class EthereumTestConnector implements TestConnector {
 
   @override
   Future<bool> openWalletApp() => _connector.openWalletApp();
+
+  WalletConnect getWalletConnect() {
+    return _connector.connector;
+  }
 
   @override
   Future<double> getBalance() async {

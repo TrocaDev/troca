@@ -1,14 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../controllers/test_connector.dart';
-
-enum TransactionState {
-  idle,
-  sending,
-  successful,
-  failed,
-}
+import 'package:troca/models/test_connecter.dart';
+import 'package:walletconnect_dart/walletconnect_dart.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:xmtp/xmtp.dart' as xmtp;
 
 class WalletPage extends StatefulWidget {
   const WalletPage({
@@ -23,209 +20,87 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
-  late Future<double> balanceFuture = widget.connector.getBalance();
-  final addressController = TextEditingController();
-  final amountController = TextEditingController();
   bool validateAddress = true;
   bool validateAmount = true;
-  TransactionState state = TransactionState.idle;
 
+  //DISPOSE
   @override
   void dispose() {
-    addressController.dispose();
-    amountController.dispose();
     super.dispose();
   }
 
+  //Init
   @override
   void initState() {
     Future.delayed(const Duration(seconds: 1), () => copyAddressToClipboard());
     super.initState();
   }
 
+  //UI for XMTP sign in page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    'Address',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ),
-                Text(widget.connector.address),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    'Balance',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ),
-                FutureBuilder<double>(
-                  future: balanceFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final balance = snapshot.data;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                              '${balance!.toStringAsFixed(5)} ${widget.connector.coinName}'),
-                          Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => setState(() {
-                                  balanceFuture = widget.connector.getBalance();
-                                }),
-                                child: const Text('Refresh'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    copyAddressToClipboard();
-                                    Future.delayed(
-                                      const Duration(seconds: 1),
-                                      () => launchUrl(
-                                        Uri.parse(
-                                          widget.connector.faucetUrl,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text('Faucet'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: TextField(
-                    controller: addressController,
-                    keyboardType: TextInputType.text,
-                    autocorrect: false,
-                    enableSuggestions: true,
-                    decoration: InputDecoration(
-                      labelText: 'Recipient address',
-                      errorText: validateAddress ? null : 'Invalid address',
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: TextField(
-                    controller: amountController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Amount',
-                      errorText: validateAmount
-                          ? null
-                          : 'Please enter amount in ${widget.connector.coinName}',
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 32),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      FocusScope.of(context).unfocus();
-                      if (amountController.text.isNotEmpty) {
-                        setState(() => validateAmount = true);
-                        if (widget.connector
-                            .validateAddress(address: addressController.text)) {
-                          setState(() => validateAddress = true);
-
-                          // action
-                          await transactionAction();
-                        } else {
-                          setState(() => validateAddress = false);
-                        }
-                      } else {
-                        setState(() => validateAmount = false);
-                      }
-                    },
-                    child: Text(transactionString()),
-                  ),
-                ),
-              ],
+            child: Center(
+          child: Column(children: [
+            Text(widget.connector.address),
+            const SizedBox(
+              height: 30,
             ),
-          ),
+            ElevatedButton(
+                onPressed: () async {
+                  xmtpC();
+                },
+                child: const Text("XMTP SIGNING"))
+          ]),
+        )),
+      ),
+    );
+  }
+
+  // REQUEST WALLET FOR SIGNER
+  xmtp.Signer asSigner() {
+    final wc = widget.connector.getWalletConnect();
+    if (wc.session.accounts.isEmpty) {
+      throw WalletConnectException("no accounts available for signing");
+    }
+    var address = wc.session.accounts.first;
+    return xmtp.Signer.create(
+        address,
+        (text) => wc.sendCustomRequest(
+              method: "personal_sign",
+              params: [text, address],
+            ).then((res) => hexToBytes(res)));
+  }
+
+  //XMTP SIGNING
+  Future<void> xmtpC() async {
+    var wallet = asSigner();
+    var api = xmtp.Api.create();
+    xmtp.Client? client =
+        await xmtp.Client.createFromWallet(api, wallet).then((value) {
+      print(value.keys.preKeys[0].privateKey);
+    }).timeout(const Duration(seconds: 120));
+
+    //TO DO
+    //
+    //Store the XMTP Data into storage
+
+    // await mySecureStorage.save(client.keys.writeToBuffer());
+
+    //NAVIGATING TO NEXT PAGE
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const Scaffold(
+          body: Center(child: Text("SUCCESSFUL")),
         ),
       ),
     );
   }
 
-  String transactionString() {
-    switch (state) {
-      case TransactionState.idle:
-        return 'Send transaction';
-      case TransactionState.sending:
-        return 'Sending transaction. Please go back to the Wallet to confirm.';
-      case TransactionState.successful:
-        return 'Transaction successful';
-      case TransactionState.failed:
-        return 'Transaction failed';
-    }
-  }
-
-  Future<void> transactionAction() async {
-    switch (state) {
-      case TransactionState.idle:
-        // Send transaction
-        setState(() => state = TransactionState.sending);
-
-        Future.delayed(Duration.zero, () async {
-          final result = await widget.connector.openWalletApp();
-          if (!result) {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                content: const Text('Failed to open the Wallet app'),
-                actions: [
-                  TextButton(
-                    child: const Text('OK'),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              ),
-            );
-          }
-        });
-
-        final hash = await widget.connector.sendTestingAmount(
-            recipientAddress: addressController.text,
-            amount: double.parse(amountController.text));
-
-        if (hash != null) {
-          setState(() => state = TransactionState.successful);
-        } else {
-          setState(() => state = TransactionState.failed);
-        }
-        break;
-      case TransactionState.sending:
-      case TransactionState.successful:
-      case TransactionState.failed:
-        // Do nothing
-        break;
-    }
-  }
-
+  //Copying the Address to clipboard
   void copyAddressToClipboard() {
     Clipboard.setData(ClipboardData(text: widget.connector.address));
     ScaffoldMessenger.of(context).showSnackBar(
