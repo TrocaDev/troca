@@ -1,9 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/test_connecter.dart';
+import 'package:troca/screens/chat/chat_messages.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
@@ -36,6 +38,8 @@ class _WalletPageState extends State<WalletPage> {
     Future.delayed(const Duration(seconds: 1), () => copyAddressToClipboard());
     super.initState();
   }
+
+  xmtp.Client? client;
 
   //UI for XMTP sign in page
   @override
@@ -79,13 +83,20 @@ class _WalletPageState extends State<WalletPage> {
   //XMTP SIGNING
   Future<void> xmtpC() async {
     var wallet = asSigner();
-    var api = xmtp.Api.create();
+    //Explicitly defining APIs
+    var api = xmtp.Api.create(
+        host: 'dev.xmtp.network',
+        port: 5556,
+        isSecure: true,
+        debugLogRequests: kDebugMode,
+        appVersion: "dev/0.0.0-development");
+    ;
     final mySecureStorage = const FlutterSecureStorage();
     widget.connector.openWalletApp();
 
     // ignore: unused_local_variable
 
-    xmtp.Client? client =
+    client =
         await xmtp.Client.createFromWallet(api, wallet).then((value) async {
       await mySecureStorage.write(
           //Saving the keys into Local Storage
@@ -97,9 +108,7 @@ class _WalletPageState extends State<WalletPage> {
     //NAVIGATING TO NEXT PAGE
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const Scaffold(
-          body: Center(child: Text("SUCCESSFUL")),
-        ),
+        builder: (context) => ChatMessages(client: client!),
       ),
     );
   }
@@ -117,3 +126,13 @@ class _WalletPageState extends State<WalletPage> {
     );
   }
 }
+
+/// This runs when the user logs out.
+/// It kills the background isolate, clears their authorized keys, and
+/// empties the database.
+// Future<void> clear() async {
+//   var prefs = await SharedPreferences.getInstance();
+//   await prefs.remove('xmtp.keys');
+//   initialized = false;
+//   notifyListeners();
+// }

@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/wallet.dart';
+import 'package:troca/screens/chat/chat_messages.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
@@ -98,18 +100,23 @@ class _AuthScreenState extends State<AuthScreen> {
                               });
                               var keys = xmtp.PrivateKeyBundle.fromJson(x);
                               debugPrint("$keys");
-
-                              var api = xmtp.Api.create();
-                              await xmtp.Client.createFromKeys(api, keys);
+                              //Explicitly defining APIs
+                              var api = xmtp.Api.create(
+                                  host: 'dev.xmtp.network',
+                                  port: 5556,
+                                  isSecure: true,
+                                  debugLogRequests: kDebugMode,
+                                  appVersion: "dev/0.0.0-development");
+                              var client =
+                                  await xmtp.Client.createFromKeys(api, keys);
                               setState(() {
                                 isLoading = !isLoading;
                               });
                               // ignore: use_build_context_synchronously
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => const Scaffold(
-                                    body: Center(child: Text("SUCCESSFUL")),
-                                  ),
+                                  builder: (context) =>
+                                      ChatMessages(client: client),
                                 ),
                               );
                             }
