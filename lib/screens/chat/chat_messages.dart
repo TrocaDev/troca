@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
-// import '../../models/address_avatar.dart';
+import '../../models/address_avatar.dart';
 
 class ChatMessages extends StatefulWidget {
   const ChatMessages({super.key, required this.client});
@@ -52,10 +52,14 @@ class _ChatMessagesState extends State<ChatMessages> {
 
               // separatorBuilder: (BuildContext context, int index) => const Divider(color: Colors.brown),
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text("FROM: ${messages[index].peer.toString()}"),
-                  subtitle: Text("TOPIC: ${messages[index].topic.toString()}"),
-                );
+                // return ListTile(
+                //   title: Text(
+                //     "FROM: ${messages[index].peer.toString()}"
+                //   ),
+                //   subtitle: Text("FROM: ${messages[index].peer.toString()}"),
+                // );
+
+                return MessageListItem(message: messages[index]);
               },
               reverse: true,
             ),
@@ -80,24 +84,24 @@ class _ChatMessagesState extends State<ChatMessages> {
 }
 
 /// An item in the conversation's message list.
-// class MessageListItem extends StatelessWidget {
-//   final xmtp.Conversation message;
+class MessageListItem extends StatelessWidget {
+  final xmtp.Conversation message;
 
-//   MessageListItem({Key? key, required this.message})
-//       : super(key: Key(message.conversationId));
+  MessageListItem({Key? key, required this.message})
+      : super(key: Key(message.conversationId));
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return ListTile(
-  //     leading: AddressAvatar(address: message.peer),
-  //     title: Text(message.peer as String),
-  //     horizontalTitleGap: 8,
-  //     trailing: Text(DateFormat.jm().format(message.createdAt)),
-  //     subtitle: Padding(
-  //       padding: const EdgeInsets.only(left: 12.0),
-  //       child: Text(message.topic[1]),
-  //     ),
-  //     // onTap: () => context.go('/conversation/$topic'),
-  //   );
-  // }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: AddressAvatar(address: message.peer),
+      title: Text(message.peer.toString()),
+      horizontalTitleGap: 8,
+      trailing: Text(DateFormat.jm().format(message.createdAt)),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(left: 12.0),
+        child: Text(message.topic),
+      ),
+      // onTap: () => context.go('/conversation/$topic'),
+    );
+  }
+}
