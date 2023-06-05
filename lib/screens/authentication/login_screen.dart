@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/wallet.dart';
-import 'package:troca/screens/chat/chat_messages.dart';
+import 'package:troca/screens/user/user_list_screen.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
@@ -116,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      ChatMessages(client: client),
+                                      UserListScreen(client: client),
                                 ),
                               );
                             }
