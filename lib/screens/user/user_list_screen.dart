@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:troca/screens/chat/chat_screen.dart';
 import 'package:troca/services/xmtp_service.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
@@ -15,24 +16,33 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
+  ///Initial Variables
   List<xmtp.Conversation> messages = [];
   bool _isLoading = false;
+  var listening;
   final XmtpService xmtpService = XmtpService();
 
+  ///Init
   @override
   void initState() {
     super.initState();
     _loadItems();
   }
 
+  /// Function to show Circular Progress Indicator and load messages meanwhile
   Future<void> _loadItems() async {
     setState(() {
       _isLoading = true;
     });
 
     await setMessages();
+    listening = widget.client.streamConversations().listen((convo) {
+      debugPrint('Got a new conversation with ${convo.peer}');
+    });
+
     List<xmtp.Conversation> fetchedItems =
         await xmtpService.listConversations(client: widget.client);
+    print(fetchedItems.length);
 
     setState(() {
       messages = fetchedItems;
@@ -40,6 +50,7 @@ class _UserListScreenState extends State<UserListScreen> {
     });
   }
 
+  ///Screen UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +87,7 @@ class _UserListScreenState extends State<UserListScreen> {
               ),
             ),
             Expanded(
-              // If messages are loading, show CircularIndicator else list messages
+              /// If messages are loading, show CircularIndicator else list messages
               child: _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(),
@@ -85,7 +96,10 @@ class _UserListScreenState extends State<UserListScreen> {
                       child: ListView.builder(
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
-                          return MessageListItem(message: messages[index]);
+                          return MessageListItem(
+                            message: messages[index],
+                            client: widget.client,
+                          );
                         },
                       ),
                     ),
@@ -96,17 +110,19 @@ class _UserListScreenState extends State<UserListScreen> {
     );
   }
 
+  ///Load All Conversations
   Future<bool> setMessages() async {
     messages = await xmtpService.listConversations(client: widget.client);
     return true;
   }
 }
 
-/// An item in the conversation's message list.
+/// Individual Conversation's UI
 class MessageListItem extends StatelessWidget {
   final xmtp.Conversation message;
+  final xmtp.Client client;
 
-  MessageListItem({Key? key, required this.message})
+  MessageListItem({Key? key, required this.message, required this.client})
       : super(key: Key(message.conversationId));
 
   @override
@@ -119,38 +135,45 @@ class MessageListItem extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: AddressAvatar(address: message.peer),
-        ),
-        title: Text(
-          message.peer.toString(),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: AddressAvatar(address: message.peer),
           ),
-        ),
-        horizontalTitleGap: 8,
-        trailing: Text(
-          DateFormat.jm().format(message.createdAt),
-          style: const TextStyle(
-            color: Color.fromARGB(255, 152, 151, 151),
-          ),
-        ),
-        subtitle: const Padding(
-          padding: EdgeInsets.only(top: 5.0),
-          child: Text(
-            "Messages that are sent and received will be shown here.",
+          title: Text(
+            message.peer.toString(),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: TextStyle(
-                color: Color.fromARGB(255, 83, 83, 83), decorationThickness: 1),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        // onTap: () => context.go('/conversation/$topic'),
-      ),
+          horizontalTitleGap: 8,
+          trailing: Text(
+            DateFormat.jm().format(message.createdAt),
+            style: const TextStyle(
+              color: Color.fromARGB(255, 152, 151, 151),
+            ),
+          ),
+          subtitle: const Padding(
+            padding: EdgeInsets.only(top: 5.0),
+            child: Text(
+              "Messages that are sent and received will be shown here.",
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(
+                  color: Color.fromARGB(255, 83, 83, 83),
+                  decorationThickness: 1),
+            ),
+          ),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatScreen(
+                  client: client,
+                  conversation: message,
+                ),
+              ))),
     );
   }
 }
