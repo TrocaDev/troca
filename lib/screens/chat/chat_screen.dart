@@ -18,7 +18,6 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _controller = TextEditingController();
   List<xmtp.DecodedMessage> messages = [];
   var listening;
-  final ScrollController _scrollController = ScrollController();
 
   ///Init
   @override
@@ -141,7 +140,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             if (_controller.text.isEmpty) {
                               return;
                             }
-                            FocusScope.of(context).unfocus();
                             await widget.client.sendMessage(
                               widget.conversation,
                               _controller.text,
