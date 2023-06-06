@@ -97,7 +97,6 @@ class XmtpService {
     xmtp.SortDirection? sort = xmtp.SortDirection.SORT_DIRECTION_DESCENDING,
   }) async {
     var conversations = await client.listConversations();
-    print(conversations);
 
     return conversations;
   }

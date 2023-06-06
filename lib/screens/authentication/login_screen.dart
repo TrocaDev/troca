@@ -234,50 +234,6 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // **Backup code for the above**
-  // VoidCallback? _transactionStateToAction(BuildContext context,
-  //     {required ConnectionState state}) {
-  //   debugPrint('State: ${_transactionStateToString(state: state)}');
-  //   switch (state) {
-  //     // Progress, action disabled
-  //     case ConnectionState.connecting:
-  //       return null;
-  //     case ConnectionState.connected:
-  //       // Open new page
-  //       return () => _openWalletPage();
-
-  //     // Initiate the connection
-  //     case ConnectionState.Disconnected:
-  //     case ConnectionState.connectionCancelled:
-  //     case ConnectionState.connectionFailed:
-  //       return () async {
-  //         setState(() => _state = ConnectionState.connecting);
-  //         try {
-  //           final session =
-  //               await connector.connect(context).catchError((error) {
-  //             ScaffoldMessenger.of(context)
-  //                 .showSnackBar(SnackBar(content: Text(error)));
-  //             return null;
-  //           });
-
-  //           if (session != null) {
-  //             debugPrint("SESSION EXISTED");
-  //             setState(() => _state = ConnectionState.connected);
-  //             Future.delayed(Duration.zero, () => _openWalletPage());
-  //           } else {
-  //             // NOTE: workaround for `connect` working only once
-  //             // see https://github.com/nextchapterstudio/walletconnect_qrcode_modal_dart/issues/22
-  //             connector = EthereumTestConnector();
-  //             setState(() => _state = ConnectionState.connectionCancelled);
-  //           }
-  //         } catch (e) {
-  //           debugPrint('WC exception occured: $e');
-  //           setState(() => _state = ConnectionState.connectionFailed);
-  //         }
-  //       };
-  //   }
-  // }
-
   // CHANGE IN NETWORK(CURRENTLY ONLY ETHEREUM NETWORK)
   void _changeNetwork(String? network) {
     if (network == null || _networkName == network) return;

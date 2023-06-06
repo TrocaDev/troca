@@ -19,21 +19,26 @@ class MessageBubble extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color:
-                    isMe ? Colors.red[400] : Color.fromARGB(255, 128, 72, 72),
+                color: isMe
+                    ? Colors.red[400]
+                    : const Color.fromARGB(255, 128, 72, 72),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                  bottomLeft: !isMe ? Radius.circular(0) : Radius.circular(12),
-                  bottomRight: isMe ? Radius.circular(0) : Radius.circular(12),
+                  topLeft: const Radius.circular(12),
+                  topRight: const Radius.circular(12),
+                  bottomLeft: !isMe
+                      ? const Radius.circular(0)
+                      : const Radius.circular(12),
+                  bottomRight: isMe
+                      ? const Radius.circular(0)
+                      : const Radius.circular(12),
                 ),
               ),
               width: 140,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 vertical: 10,
                 horizontal: 16,
               ),
-              margin: EdgeInsets.symmetric(
+              margin: const EdgeInsets.symmetric(
                 vertical: 16,
                 horizontal: 8,
               ),
@@ -42,8 +47,10 @@ class MessageBubble extends StatelessWidget {
                     isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Text(
-                    userName,
-                    style: TextStyle(
+                    isMe ? "You" : userName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 255, 203, 201),
                     ),
@@ -51,7 +58,7 @@ class MessageBubble extends StatelessWidget {
                   ),
                   Text(
                     message,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),

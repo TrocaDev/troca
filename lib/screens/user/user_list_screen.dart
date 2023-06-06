@@ -36,13 +36,9 @@ class _UserListScreenState extends State<UserListScreen> {
     });
 
     await setMessages();
-    listening = widget.client.streamConversations().listen((convo) {
-      debugPrint('Got a new conversation with ${convo.peer}');
-    });
 
     List<xmtp.Conversation> fetchedItems =
         await xmtpService.listConversations(client: widget.client);
-    print(fetchedItems.length);
 
     setState(() {
       messages = fetchedItems;
@@ -112,7 +108,9 @@ class _UserListScreenState extends State<UserListScreen> {
 
   ///Load All Conversations
   Future<bool> setMessages() async {
+    // messages = await xmtpService.listConversations(client: widget.client);
     messages = await xmtpService.listConversations(client: widget.client);
+
     return true;
   }
 }
@@ -135,45 +133,55 @@ class MessageListItem extends StatelessWidget {
         ),
       ),
       child: ListTile(
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: AddressAvatar(address: message.peer),
+        leading: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: AddressAvatar(address: message.peer),
+        ),
+        title: Text(
+          message.peer.toString(),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
           ),
-          title: Text(
-            message.peer.toString(),
+        ),
+        horizontalTitleGap: 8,
+        trailing: Text(
+          DateFormat.jm().format(message.createdAt),
+          style: const TextStyle(
+            color: Color.fromARGB(255, 152, 151, 151),
+          ),
+        ),
+        subtitle: const Padding(
+          padding: EdgeInsets.only(top: 5.0),
+          child: Text(
+            "Messages that are sent and received will be shown here.",
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(
+                color: Color.fromARGB(255, 83, 83, 83), decorationThickness: 1),
           ),
-          horizontalTitleGap: 8,
-          trailing: Text(
-            DateFormat.jm().format(message.createdAt),
-            style: const TextStyle(
-              color: Color.fromARGB(255, 152, 151, 151),
+        ),
+        onTap: () async {
+          var friend = message.peer;
+          var workTalk = await client.newConversation(
+            friend.toString(),
+            conversationId: message.conversationId,
+            metadata: message.metadata,
+          );
+          // ignore: use_build_context_synchronously
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                client: client,
+                conversation: workTalk,
+              ),
             ),
-          ),
-          subtitle: const Padding(
-            padding: EdgeInsets.only(top: 5.0),
-            child: Text(
-              "Messages that are sent and received will be shown here.",
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: TextStyle(
-                  color: Color.fromARGB(255, 83, 83, 83),
-                  decorationThickness: 1),
-            ),
-          ),
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  client: client,
-                  conversation: message,
-                ),
-              ))),
+          );
+        },
+      ),
     );
   }
 }
