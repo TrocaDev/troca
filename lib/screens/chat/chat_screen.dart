@@ -3,6 +3,7 @@ import 'package:troca/screens/chat/message_bubble.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 class ChatScreen extends StatefulWidget {
+  static const routeName = "/chat-screen";
   const ChatScreen(
       {super.key, required this.client, required this.conversation});
 
@@ -18,27 +19,42 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _controller = TextEditingController();
   List<xmtp.DecodedMessage> messages = [];
   var listening;
+  var listening2;
+
+  //clear data stack
+  void clear() async {
+    await listening.cancel;
+  }
 
   ///Init
   @override
   void initState() {
     super.initState();
-    listening =
-        widget.client.streamMessages(widget.conversation).listen((message) {
-      debugPrint('${message.sender} has a content of == ${message.content}');
-      messages.add(message);
-    });
     _loadItems();
   }
 
+  //Load items
   Future<void> _loadItems() async {
     setState(() {
       _isLoading = true;
     });
 
-    List<xmtp.DecodedMessage> fetchedItems = await widget.client.listMessages(
-        widget.conversation,
-        sort: xmtp.SortDirection.SORT_DIRECTION_ASCENDING);
+    listening = widget.client.streamMessages(widget.conversation).listen(
+      (message) {
+        debugPrint('${message.sender} has a content of == ${message.content}');
+        messages.add(message);
+      },
+      onError: (e) {
+        print(e);
+      },
+    );
+
+    List<xmtp.DecodedMessage> fetchedItems =
+        await widget.client.listMessages(widget.conversation,
+            start: DateTime.now().subtract(
+              const Duration(hours: 24),
+            ),
+            sort: xmtp.SortDirection.SORT_DIRECTION_ASCENDING);
 
     setState(() {
       messages = fetchedItems;
@@ -57,29 +73,12 @@ class _ChatScreenState extends State<ChatScreen> {
           : Stack(
               children: [
                 Padding(
-                    padding: const EdgeInsets.only(bottom: 70),
-                    child: StreamBuilder(
-                      stream: widget.client.streamMessages(widget.conversation),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return ListView.builder(
-                            // reverse: true,
-                            shrinkWrap: true,
-                            itemCount: messages.length,
-                            itemBuilder: (context, index) => MessageBubble(
-                              messages[index].content,
-                              (messages[index].sender ==
-                                  widget.conversation.me),
-                              messages[index].sender.toString(),
-                              messages[index].topic,
-                            ),
-                          );
-                        }
-                        if (snapshot.data != null) {}
-
+                  padding: const EdgeInsets.only(bottom: 70),
+                  child: StreamBuilder(
+                    stream: widget.client.streamMessages(widget.conversation),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return ListView.builder(
-                          scrollDirection: Axis.vertical,
                           // reverse: true,
                           shrinkWrap: true,
                           itemCount: messages.length,
@@ -90,8 +89,24 @@ class _ChatScreenState extends State<ChatScreen> {
                             messages[index].topic,
                           ),
                         );
-                      },
-                    )),
+                      }
+                      if (snapshot.data != null) {}
+
+                      return ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        // reverse: true,
+                        shrinkWrap: true,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) => MessageBubble(
+                          messages[index].content,
+                          (messages[index].sender == widget.conversation.me),
+                          messages[index].sender.toString(),
+                          messages[index].topic,
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Container(

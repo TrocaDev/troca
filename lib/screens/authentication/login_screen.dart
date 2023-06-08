@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/wallet.dart';
-import 'package:troca/screens/user/user_list_screen.dart';
+import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
@@ -17,6 +17,7 @@ enum ConnectionState {
 }
 
 class AuthScreen extends StatefulWidget {
+  static const routeName = "/authscreen";
   const AuthScreen({Key? key}) : super(key: key);
 
   @override
@@ -112,12 +113,10 @@ class _AuthScreenState extends State<AuthScreen> {
                               setState(() {
                                 isLoading = !isLoading;
                               });
-                              // ignore: use_build_context_synchronously
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      UserListScreen(client: client),
-                                ),
+                              //Navigating to next page
+                              Navigator.of(context).pushNamed(
+                                BottomBar.routeName,
+                                arguments: client,
                               );
                             }
                           },
@@ -181,13 +180,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // NAVIGATE TO NEXT PAGE
   void _openWalletPage() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => WalletPage(
-          connector: connector,
-        ),
-      ),
-    );
+    Navigator.of(context).pushNamed(WalletPage.routeName);
   }
 
   // AUTHENTICATE DAPP USING WALLETS(METAMASK)

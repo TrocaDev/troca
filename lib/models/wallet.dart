@@ -6,6 +6,7 @@ import 'package:troca/models/test_connecter.dart';
 import 'package:troca/services/xmtp_service.dart';
 
 class WalletPage extends StatefulWidget {
+  static const routeName = "/xmtp-signing";
   const WalletPage({
     required this.connector,
     Key? key,
