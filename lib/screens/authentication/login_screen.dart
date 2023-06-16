@@ -7,6 +7,7 @@ import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
 import '../../models/test_connecter.dart';
+import '../user/user_list_screen.dart';
 
 enum ConnectionState {
   Disconnected,
@@ -110,10 +111,14 @@ class _AuthScreenState extends State<AuthScreen> {
                                   appVersion: "dev/0.0.0-development");
                               var client =
                                   await xmtp.Client.createFromKeys(api, keys);
+                              // final manager =
+                              //     await BackgroundManager.create(keys);
                               setState(() {
                                 isLoading = !isLoading;
                               });
                               //Navigating to next page
+                              // await session.authorizeOne(client);
+
                               Navigator.of(context).pushNamed(
                                 BottomBar.routeName,
                                 arguments: client,
@@ -180,7 +185,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // NAVIGATE TO NEXT PAGE
   void _openWalletPage() {
-    Navigator.of(context).pushNamed(WalletPage.routeName);
+    Navigator.of(context).pushNamed(WalletPage.routeName, arguments: connector);
   }
 
   // AUTHENTICATE DAPP USING WALLETS(METAMASK)
@@ -204,10 +209,10 @@ class _AuthScreenState extends State<AuthScreen> {
       case ConnectionState.connectionFailed:
         setState(() => _state = ConnectionState.connecting);
         try {
+          // ignore: body_might_complete_normally_catch_error
           final session = await connector.connect(context).catchError((error) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(error)));
-            return null;
           });
 
           if (session != null) {

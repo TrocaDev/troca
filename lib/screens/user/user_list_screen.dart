@@ -11,7 +11,10 @@ import '../../models/address_avatar.dart';
 
 class UserListScreen extends StatefulWidget {
   static const routeName = "/user-list-screen";
-  const UserListScreen({super.key, required this.client});
+  const UserListScreen({
+    super.key,
+    required this.client,
+  });
 
   final xmtp.Client client;
 
@@ -95,13 +98,9 @@ class _UserListScreenState extends State<UserListScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SearchUser(
-                            client: widget.client,
-                          ),
-                        ),
+                      Navigator.of(context).pushNamed(
+                        SearchUser.routeName,
+                        arguments: widget.client,
                       );
                     },
                     child: Container(
@@ -237,15 +236,8 @@ class MessageListItem extends StatelessWidget {
             metadata: message.metadata,
           );
           // ignore: use_build_context_synchronously
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                client: client,
-                conversation: workTalk,
-              ),
-            ),
-          );
+          Navigator.of(context)
+              .pushNamed(ChatScreen.routeName, arguments: [client, workTalk]);
         },
       ),
     );

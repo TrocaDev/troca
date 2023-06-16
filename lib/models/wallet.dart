@@ -46,22 +46,25 @@ class _WalletPageState extends State<WalletPage> {
       appBar: AppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
-            child: Center(
-          child: Column(children: [
-            Text(widget.connector.address),
-            const SizedBox(
-              height: 30,
+          child: Center(
+            child: Column(
+              children: [
+                Text(widget.connector.address),
+                const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                    onPressed: () async {
+                      xmtpService.xmtpC(
+                        connector: widget.connector,
+                        context: context,
+                      );
+                    },
+                    child: const Text("XMTP SIGNING"))
+              ],
             ),
-            ElevatedButton(
-                onPressed: () async {
-                  xmtpService.xmtpC(
-                    connector: widget.connector,
-                    context: context,
-                  );
-                },
-                child: const Text("XMTP SIGNING"))
-          ]),
-        )),
+          ),
+        ),
       ),
     );
   }

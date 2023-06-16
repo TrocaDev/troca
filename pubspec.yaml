@@ -53,6 +53,13 @@ dependencies:
   hooks_riverpod: ^2.3.6
   ethereum_addresses: ^1.0.2
   http: ^0.13.6
+  animated_bottom_navigation_bar: ^1.2.0
+  google_nav_bar: ^5.0.6
+  drift: ^2.8.2
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.0.0
+  path: ^1.8.3
+  retry: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -64,10 +71,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   # flutter_lints: ^2.0.0
-  build_runner: ^2.4.4
   flutter_lints: ^2.0.1
   json_serializable: ^6.7.0
   hive_generator: ^2.0.0
+  drift_dev: ^2.8.3
+  build_runner: ^2.4.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
