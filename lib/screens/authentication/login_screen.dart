@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,7 +9,6 @@ import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
 import '../../models/test_connecter.dart';
-import '../user/user_list_screen.dart';
 
 enum ConnectionState {
   Disconnected,
@@ -85,14 +86,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             // ignore: prefer_const_declarations
-                            final mySecureStorage =
-                                const FlutterSecureStorage();
+
+                            ///**Searching for Stored keys
+                            const mySecureStorage = FlutterSecureStorage();
                             var x =
                                 await mySecureStorage.read(key: "xmtp.keys");
 
                             if (x == null || x.isEmpty) {
+                              //**IMPLEMENTATION IF USER ISN'T LOGGED IN */
                               debugPrint("Login");
-                              // ignore: use_build_context_synchronously
                               _action(context, state: _state);
                               print(_state);
                             } else {
@@ -111,14 +113,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                   appVersion: "dev/0.0.0-development");
                               var client =
                                   await xmtp.Client.createFromKeys(api, keys);
-                              // final manager =
-                              //     await BackgroundManager.create(keys);
                               setState(() {
                                 isLoading = !isLoading;
                               });
                               //Navigating to next page
-                              // await session.authorizeOne(client);
-
                               Navigator.of(context).pushNamed(
                                 BottomBar.routeName,
                                 arguments: client,

@@ -10,8 +10,6 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:web3dart/crypto.dart';
 
-import '../screens/user/user_list_screen.dart';
-
 class XmtpService {
   xmtp.Signer asSigner({
     required TestConnector connector,
@@ -59,9 +57,6 @@ class XmtpService {
 
     //NAVIGATING TO NEXT PAGE
     Navigator.of(context).pushNamed(
-      // MaterialPageRoute(
-      //   builder: (context) => UserListScreen(client: client),
-      // ),
       BottomBar.routeName,
       arguments: client,
     );
@@ -80,16 +75,6 @@ class XmtpService {
       ),
     );
   }
-
-  /// This runs when the user logs out.
-  /// It kills the background isolate, clears their authorized keys, and
-  /// empties the database.
-// Future<void> clear() async {
-//   var prefs = await SharedPreferences.getInstance();
-//   await prefs.remove('xmtp.keys');
-//   initialized = false;
-//   notifyListeners();
-// }
 
 //Listing Conversations
   Future<List<xmtp.Conversation>> listConversations({

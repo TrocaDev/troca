@@ -49,12 +49,9 @@ class _ChatScreenState extends State<ChatScreen> {
       },
     );
 
-    List<xmtp.DecodedMessage> fetchedItems =
-        await widget.client.listMessages(widget.conversation,
-            start: DateTime.now().subtract(
-              const Duration(hours: 24),
-            ),
-            sort: xmtp.SortDirection.SORT_DIRECTION_ASCENDING);
+    List<xmtp.DecodedMessage> fetchedItems = await widget.client.listMessages(
+        widget.conversation,
+        sort: xmtp.SortDirection.SORT_DIRECTION_ASCENDING);
 
     setState(() {
       messages = fetchedItems;

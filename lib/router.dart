@@ -6,7 +6,6 @@ import 'package:troca/screens/chat/chat_screen.dart';
 import 'package:troca/screens/search/search_result.dart';
 import 'package:troca/screens/search/search_user.dart';
 import 'package:troca/screens/user/connect_mobile.dart';
-import 'package:troca/screens/user/test.dart';
 import 'package:troca/screens/user/user_list_screen.dart';
 import 'package:troca/screens/user/user_settings.dart';
 import 'package:xmtp/xmtp.dart';
@@ -91,15 +90,6 @@ Route<dynamic>? generateRoute(RouteSettings routeSettings) {
         builder: (_) => BottomBar(
           client: client,
         ),
-      );
-
-    case TestScreen.routeName:
-      Client client = routeSettings.arguments as Client;
-      return MaterialPageRoute(
-        settings: routeSettings,
-        builder: (_) => TestScreen(
-          client: client,
-        ) as Widget,
       );
 
     default:

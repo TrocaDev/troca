@@ -38,15 +38,15 @@ Future<String> findPhoneNumber(String phoneNumber) async {
     // Handle the result based on the response body
     if (result.containsKey('connectedAddress')) {
       final connectedAddress = result['connectedAddress'];
-      print('Connected Address: $connectedAddress');
+      debugPrint('Connected Address: $connectedAddress');
       return connectedAddress;
     } else if (result.containsKey('message')) {
       final message = result['message'];
-      print('Message: $message');
+      debugPrint('Message: $message');
       return message;
     } else {
-      print(result.toString());
-      return "NAN";
+      debugPrint(result.toString());
+      return "Not a Valid Input";
     }
   } catch (e) {
     print('Error: $e');
