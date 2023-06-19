@@ -99,11 +99,6 @@ class _UserListScreenState extends State<UserListScreen> {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushNamed(
-                        // MaterialPageRoute(
-                        //   builder: (context) => SearchUser(
-                        //     client: widget.client,
-                        //   ),
-                        // ),
                         SearchUser.routeName,
                         arguments: widget.client,
                       );
