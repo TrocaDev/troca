@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/wallet.dart';
-import 'package:troca/screens/authentication/test.dart';
 import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
@@ -93,7 +92,6 @@ class _AuthScreenState extends State<AuthScreen> {
                             const mySecureStorage = FlutterSecureStorage();
                             var x =
                                 await mySecureStorage.read(key: "xmtp.keys");
-
                             if (x == null || x.isEmpty) {
                               //**IMPLEMENTATION IF USER ISN'T LOGGED IN */
                               debugPrint("Login");
@@ -116,16 +114,16 @@ class _AuthScreenState extends State<AuthScreen> {
                               );
                               var client =
                                   await xmtp.Client.createFromKeys(api, keys);
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
                               // await session.authorizeLogin(client);
                               await session.testAuthorize(client);
 
                               print("TEST SCREEN");
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
                               //Navigating to next page
                               Navigator.of(context).pushNamed(
-                                TestScreen.routeName,
+                                BottomBar.routeName,
                                 arguments: client,
                               );
                             }

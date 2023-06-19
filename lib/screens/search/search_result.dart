@@ -54,7 +54,7 @@ class SearchResult extends StatelessWidget {
                             );
                           } else {
                             var convo = await client.newConversation(ethereum);
-                            Navigator.of(context).pushNamed(
+                            Navigator.of(context).pushReplacementNamed(
                               ChatScreen.routeName,
                               arguments: [client, convo],
                             );

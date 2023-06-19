@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '/api.dart';
 import 'package:flutter/foundation.dart';
@@ -102,7 +101,7 @@ class BackgroundManager {
     var msg = await _client.sendMessageEncoded(convo!, encoded);
     // Optimistically insert the message into the local database.
     // When the network yields the real message it will be insertOrIgnored.
-    await _db.saveMessages([msg!]);
+    await _db.saveMessages([msg]);
     return Future.value(msg);
   }
 

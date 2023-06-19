@@ -17,7 +17,6 @@ class TestChatScreen extends StatefulWidget {
 }
 
 class _TestChatScreenState extends State<TestChatScreen> {
-  bool _isLoading = false;
   TextEditingController _controller = TextEditingController();
   List<xmtp.DecodedMessage> messages = [];
 
@@ -54,7 +53,7 @@ class _TestChatScreenState extends State<TestChatScreen> {
               builder: (context, snapshot) {
                 return ListView.builder(
                   scrollDirection: Axis.vertical,
-                  // reverse: true,
+                  reverse: true,
                   shrinkWrap: true,
                   itemCount:
                       (snapshot.data == null) ? 0 : snapshot.data!.length,

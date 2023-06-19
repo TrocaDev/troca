@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:troca/screens/user/user_list_screen.dart';
+import 'package:troca/screens/authentication/test.dart';
 import 'package:troca/screens/user/user_settings.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -26,9 +26,8 @@ class _BottomBarState extends State<BottomBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _page == 0
-          ? UserListScreen(client: widget.client)
-          : const UserSettings(),
+      body:
+          _page == 0 ? TestScreen(client: widget.client) : const UserSettings(),
       bottomNavigationBar: GNav(
         tabs: const [
           GButton(
@@ -46,30 +45,6 @@ class _BottomBarState extends State<BottomBar> {
         curve: Curves.elasticIn,
         style: GnavStyle.google,
         selectedIndex: 0,
-        // currentIndex: _page,
-        // onTap: updatePage,
-        // items: [
-        //   //1 HOME
-        //   BottomNavigationBarItem(
-        //     icon: Container(
-        //       child: Icon(
-        //         Icons.message_outlined,
-        //         color: Colors.red[400],
-        //       ),
-        //     ),
-        //     label: '',
-        //   ),
-        //   //2 Settings
-        //   BottomNavigationBarItem(
-        //     icon: Container(
-        //       child: Icon(
-        //         Icons.settings_outlined,
-        //         color: Colors.red[400],
-        //       ),
-        //     ),
-        //     label: '',
-        //   ),
-        // ],
       ),
     );
   }

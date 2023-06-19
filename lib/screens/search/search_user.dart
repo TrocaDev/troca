@@ -97,7 +97,7 @@ class _SearchUserState extends State<SearchUser> {
             .showSnackBar(const SnackBar(content: Text("Not a valid Input")));
       }
     }
-    Navigator.of(context).pushNamed(
+    Navigator.of(context).pushReplacementNamed(
       SearchResult.routeName,
       arguments: [ethadd, widget.client],
     );
