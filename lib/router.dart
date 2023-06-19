@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:troca/models/wallet.dart';
 import 'package:troca/screens/authentication/login_screen.dart';
+import 'package:troca/screens/authentication/test.dart';
 import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:troca/screens/chat/chat_screen.dart';
 import 'package:troca/screens/search/search_result.dart';
+import 'package:troca/screens/search/search_user.dart';
 import 'package:troca/screens/user/connect_mobile.dart';
 import 'package:troca/screens/user/user_list_screen.dart';
 import 'package:troca/screens/user/user_settings.dart';
@@ -36,25 +38,24 @@ Route<dynamic>? generateRoute(RouteSettings routeSettings) {
         ),
       );
 
-    case ChatScreen.routeName:
+    case TestScreen.routeName:
       Client client = routeSettings.arguments as Client;
-      Conversation conversation = routeSettings.arguments as Conversation;
       return MaterialPageRoute(
         settings: routeSettings,
-        builder: (_) => ChatScreen(
+        builder: (_) => TestScreen(
           client: client,
-          conversation: conversation,
         ),
       );
 
     case ChatScreen.routeName:
-      Client client = routeSettings.arguments as Client;
-      Conversation conversation = routeSettings.arguments as Conversation;
+      // Client client = routeSettings.arguments as Client;
+      // Conversation conversation = routeSettings.arguments as Conversation;
+      List<dynamic> client = routeSettings.arguments as List<dynamic>;
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => ChatScreen(
-          client: client,
-          conversation: conversation,
+          client: client[0],
+          conversation: client[1],
         ),
       );
 
@@ -71,13 +72,24 @@ Route<dynamic>? generateRoute(RouteSettings routeSettings) {
       );
 
     case SearchResult.routeName:
-      Client client = routeSettings.arguments as Client;
-      String ethereum = routeSettings.arguments as String;
+      // Client client = routeSettings.arguments as Client;
+      // String ethereum = routeSettings.arguments as String;
+
+      List<dynamic> args = routeSettings.arguments as List<dynamic>;
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => SearchResult(
+          ethereum: args[0],
+          client: args[1],
+        ),
+      );
+
+    case SearchUser.routeName:
+      Client client = routeSettings.arguments as Client;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => SearchUser(
           client: client,
-          ethereum: ethereum,
         ),
       );
 

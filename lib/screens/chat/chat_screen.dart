@@ -65,7 +65,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: SizedBox(
+          width: 250,
+          child: Text(
+            widget.conversation.peer.toString(),
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -87,6 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             (messages[index].sender == widget.conversation.me),
                             messages[index].sender.toString(),
                             messages[index].topic,
+                            messages[index].sentAt,
                           ),
                         );
                       }
@@ -102,6 +115,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           (messages[index].sender == widget.conversation.me),
                           messages[index].sender.toString(),
                           messages[index].topic,
+                          messages[index].sentAt,
                         ),
                       );
                     },
@@ -110,19 +124,25 @@ class _ChatScreenState extends State<ChatScreen> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20),
+                      ),
+                      color: Colors.white,
+                    ),
                     padding:
                         const EdgeInsets.only(left: 10, bottom: 10, top: 10),
                     height: 60,
                     width: double.infinity,
-                    color: Colors.white,
                     child: Row(
                       children: <Widget>[
                         GestureDetector(
                           child: Container(
-                            height: 30,
-                            width: 30,
+                            height: 50,
+                            width: 40,
                             decoration: BoxDecoration(
-                              color: Colors.lightBlue,
+                              color: Colors.red[400],
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: const Icon(
@@ -137,6 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            cursorColor: Colors.red[400],
                             autocorrect: true,
                             textCapitalization: TextCapitalization.sentences,
                             enableSuggestions: true,
@@ -161,12 +182,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             );
                             _controller.clear();
                           },
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.red[400],
                           elevation: 0,
                           child: const Icon(
                             Icons.send,
                             color: Colors.white,
-                            size: 18,
+                            size: 20,
                           ),
                         ),
                       ],

@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
-import 'package:troca/screens/chat/chat_screen.dart';
+import 'package:troca/screens/authentication/test_chat.dart';
 import 'package:troca/screens/search/search_user.dart';
-import 'package:troca/services/xmtp_service.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/address_avatar.dart';
+import '../../session/foreground_session.dart';
 
-class UserListScreen extends StatefulWidget {
-  static const routeName = "/user-list-screen";
-  const UserListScreen({
+class TestScreen extends StatefulWidget {
+  static const routeName = "/test-screen";
+  const TestScreen({
     super.key,
     required this.client,
   });
@@ -19,63 +18,12 @@ class UserListScreen extends StatefulWidget {
   final xmtp.Client client;
 
   @override
-  State<UserListScreen> createState() => _UserListScreenState();
+  State<TestScreen> createState() => _TestScreenState();
 }
 
-class _UserListScreenState extends State<UserListScreen> {
+class _TestScreenState extends State<TestScreen> {
   ///Initial Variables
   List<xmtp.Conversation> messages = [];
-  bool _isLoading = false;
-  var listening;
-  var listeningM;
-  final XmtpService xmtpService = XmtpService();
-
-  ///Init
-  @override
-  void initState() {
-    super.initState();
-    _loadItems();
-  }
-
-  /// Function to show Circular Progress Indicator and load messages meanwhile
-  Future<void> _loadItems() async {
-    if (listening == null) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      widget.client.streamConversations().listen((convo) async {
-        debugPrint(
-          'Got a new conversation with ${convo.peer}',
-        );
-        messages.add(convo);
-      }, onError: (e) {
-        print(e);
-      });
-
-      List<xmtp.Conversation> fetchedItems =
-          await xmtpService.listConversations(
-        client: widget.client,
-        sort: xmtp.SortDirection.SORT_DIRECTION_ASCENDING,
-      );
-
-      saveConversations(fetchedItems);
-
-      setState(() {
-        messages = fetchedItems;
-        _isLoading = false;
-      });
-    }
-  }
-
-  void saveConversations(List<xmtp.Conversation> fetchedItems) async {
-    const mySecureStorage = FlutterSecureStorage();
-
-    for (var convo in fetchedItems) {
-      await mySecureStorage.write(
-          key: "${convo.peer}", value: convo.conversationId.toString());
-    }
-  }
 
   ///Screen UI
   @override
@@ -99,11 +47,6 @@ class _UserListScreenState extends State<UserListScreen> {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushNamed(
-                        // MaterialPageRoute(
-                        //   builder: (context) => SearchUser(
-                        //     client: widget.client,
-                        //   ),
-                        // ),
                         SearchUser.routeName,
                         arguments: widget.client,
                       );
@@ -128,40 +71,25 @@ class _UserListScreenState extends State<UserListScreen> {
             ),
             Expanded(
               /// If messages are loading, show CircularIndicator else list messages
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : StreamBuilder(
-                      stream: widget.client.streamConversations(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: messages.length,
-                            itemBuilder: (context, index) {
-                              return MessageListItem(
-                                message: messages[index],
-                                client: widget.client,
-                              );
-                            },
-                          );
-                        }
-                        if (snapshot.data != null) {}
-
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            return MessageListItem(
-                              message: messages[index],
-                              client: widget.client,
-                            );
-                          },
-                        );
-                      },
-                    ),
+              child: StreamBuilder(
+                stream: useConversationList(),
+                // initialData: useConversationList(),
+                builder:
+                    (context, AsyncSnapshot<List<xmtp.Conversation>> snapshot) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount:
+                        (snapshot.data == null) ? 0 : snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return MessageListItem(
+                        // message: messages[index],
+                        message: snapshot.data![index],
+                        client: widget.client,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -169,19 +97,13 @@ class _UserListScreenState extends State<UserListScreen> {
     );
   }
 
-  ///Load All Conversations
-  Future<void> setMessages() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    var fetchedItems =
-        await xmtpService.listConversations(client: widget.client);
-
-    setState(() {
-      messages = fetchedItems;
-      _isLoading = false;
-    });
+  Stream<List<xmtp.Conversation>> useConversationList() async* {
+    print("here");
+    while (true) {
+      await Future.delayed(Duration(milliseconds: 500));
+      var messages = await session.findConversations();
+      yield messages;
+    }
   }
 }
 
@@ -240,9 +162,12 @@ class MessageListItem extends StatelessWidget {
             conversationId: message.conversationId,
             metadata: message.metadata,
           );
+          print("Test Chat Screen");
           // ignore: use_build_context_synchronously
-          Navigator.of(context)
-              .pushNamed(ChatScreen.routeName, arguments: [client, workTalk]);
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) =>
+                TestChatScreen(client: client, conversation: workTalk),
+          ));
         },
       ),
     );

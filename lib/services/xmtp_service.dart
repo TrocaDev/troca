@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/test_connecter.dart';
+import 'package:troca/screens/authentication/test.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:web3dart/crypto.dart';
@@ -57,10 +58,12 @@ class XmtpService {
     debugPrint(client.keys.toString());
 
     //NAVIGATING TO NEXT PAGE
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => UserListScreen(client: client),
-      ),
+    Navigator.of(context).pushNamed(
+      // MaterialPageRoute(
+      //   builder: (context) => UserListScreen(client: client),
+      // ),
+      TestScreen.routeName,
+      arguments: client,
     );
   }
 

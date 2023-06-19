@@ -2,11 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/wallet.dart';
+import 'package:troca/screens/authentication/test.dart';
 import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
 import '../../models/test_connecter.dart';
+import '../../session/foreground_session.dart';
 
 enum ConnectionState {
   Disconnected,
@@ -103,19 +105,24 @@ class _AuthScreenState extends State<AuthScreen> {
                               debugPrint("$keys");
                               //Explicitly defining APIs
                               var api = xmtp.Api.create(
-                                  host: 'dev.xmtp.network',
-                                  port: 5556,
-                                  isSecure: true,
-                                  debugLogRequests: kDebugMode,
-                                  appVersion: "dev/0.0.0-development");
+                                host: 'dev.xmtp.network',
+                                port: 5556,
+                                isSecure: true,
+                                debugLogRequests: kDebugMode,
+                                appVersion: "dev/0.0.0-development",
+                              );
                               var client =
                                   await xmtp.Client.createFromKeys(api, keys);
                               setState(() {
                                 isLoading = !isLoading;
                               });
+                              // await session.authorizeLogin(client);
+                              await session.testAuthorize(client);
+
+                              print("TEST SCREEN");
                               //Navigating to next page
                               Navigator.of(context).pushNamed(
-                                BottomBar.routeName,
+                                TestScreen.routeName,
                                 arguments: client,
                               );
                             }
@@ -180,7 +187,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // NAVIGATE TO NEXT PAGE
   void _openWalletPage() {
-    Navigator.of(context).pushNamed(WalletPage.routeName);
+    Navigator.of(context).pushNamed(WalletPage.routeName, arguments: connector);
   }
 
   // AUTHENTICATE DAPP USING WALLETS(METAMASK)

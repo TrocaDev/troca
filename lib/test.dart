@@ -5,20 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:troca/models/test_connecter.dart';
 import 'package:troca/services/xmtp_service.dart';
 
-class WalletPage extends StatefulWidget {
-  static const routeName = "/xmtp-signing";
-  const WalletPage({
-    required this.connector,
+class TestPage extends StatefulWidget {
+  const TestPage({
     Key? key,
   }) : super(key: key);
 
-  final TestConnector connector;
-
   @override
-  State<WalletPage> createState() => _WalletPageState();
+  State<TestPage> createState() => _TestPageState();
 }
 
-class _WalletPageState extends State<WalletPage> {
+class _TestPageState extends State<TestPage> {
   bool validateAddress = true;
   bool validateAmount = true;
   final XmtpService xmtpService = XmtpService();
@@ -27,16 +23,6 @@ class _WalletPageState extends State<WalletPage> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  //Init
-  @override
-  void initState() {
-    Future.delayed(
-        const Duration(seconds: 1),
-        () => xmtpService.copyAddressToClipboard(
-            connector: widget.connector, context: context));
-    super.initState();
   }
 
   //UI for XMTP sign in page
@@ -49,18 +35,12 @@ class _WalletPageState extends State<WalletPage> {
           child: Center(
             child: Column(
               children: [
-                Text(widget.connector.address),
+                Text("address"),
                 const SizedBox(
                   height: 30,
                 ),
                 ElevatedButton(
-                    onPressed: () async {
-                      xmtpService.xmtpC(
-                        connector: widget.connector,
-                        context: context,
-                      );
-                    },
-                    child: const Text("XMTP SIGNING"))
+                    onPressed: () async {}, child: const Text("XMTP SIGNING"))
               ],
             ),
           ),

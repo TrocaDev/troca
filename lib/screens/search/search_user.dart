@@ -1,33 +1,62 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:troca/screens/search/search_result.dart';
 import 'package:ethereum_addresses/ethereum_addresses.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 //MOCK API
-import 'dart:convert' show json;
-import 'package:flutter/services.dart' show rootBundle;
 
-Future<Map<String, dynamic>> loadJsonData() async {
-  final jsonString = await rootBundle.loadString('lib/assets/json/mobile.json');
-  final jsonData = json.decode(jsonString);
-  return jsonData;
+Future<Map<String, dynamic>> checkPhoneNumber(String phoneNumber) async {
+  var headersList = {'Content-Type': 'application/json'};
+  var url = Uri.parse('https://troca-backend.onrender.com/check');
+  var body = {"handle": "$phoneNumber"};
+
+  var req = http.Request('GET', url);
+  req.headers.addAll(headersList);
+  req.body = json.encode(body);
+
+  var response = await req.send();
+  final resBody = await response.stream.bytesToString();
+
+  if (response.statusCode == 200) {
+    return jsonDecode(resBody);
+  } else if (response.statusCode == 400) {
+    return jsonDecode(resBody);
+  } else {
+    throw Exception('Failed to check phone number');
+  }
 }
 
-Future<String> fetchNameFromPhoneNumber(String phoneNumber) async {
-  final jsonData = await loadJsonData();
-  final phoneNumbers = jsonData['phoneNumbers'];
+Future<String> findPhoneNumber(String phoneNumber) async {
+  try {
+    print("checking phone number");
+    final result = await checkPhoneNumber(phoneNumber);
 
-  for (final data in phoneNumbers) {
-    if (data['number'] == phoneNumber) {
-      return data['name'];
+    // Handle the result based on the response body
+    if (result.containsKey('connectedAddress')) {
+      final connectedAddress = result['connectedAddress'];
+      debugPrint('Connected Address: $connectedAddress');
+      return connectedAddress;
+    } else if (result.containsKey('message')) {
+      final message = result['message'];
+      debugPrint('Message: $message');
+      return message;
+    } else {
+      debugPrint(result.toString());
+      return "Not a Valid Input";
     }
+  } catch (e) {
+    print('Error: $e');
   }
-
-  return 'Name not found';
+  return "NAN";
 }
 
 //UI
 class SearchUser extends StatefulWidget {
+  static const routeName = "/search-user";
   const SearchUser({super.key, required this.client});
 
   final xmtp.Client client;
@@ -42,29 +71,35 @@ class _SearchUserState extends State<SearchUser> {
 
   Future<void> _isTrue(String address) async {
     String ethadd = "";
-    //Checking if ethereum address is valid
+    //Checking if provided string is ehtereum address
     if (isValidEthereumAddress(address) == true) {
       //checking if you can message the address
       bool _temp = await widget.client.canMessage(address);
       if (_temp == true) {
         ethadd = address;
       }
-    } else {
-      //check for name and number
-      final fetchedName = await fetchNameFromPhoneNumber(address);
-      if (fetchedName != "Name not found") {
-        ethadd = fetchedName;
+    }
+    //check for phone number
+    else {
+      var phoneNumber = address;
+      address = await findPhoneNumber(phoneNumber);
+      //Process if phone number is valid
+      if (isValidEthereumAddress(address) == true) {
+        //checking if you can message the address
+        bool _temp = await widget.client.canMessage(address);
+        if (_temp == true) {
+          ethadd = address;
+        }
+      }
+      //Process if phone number isn't valid
+      else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Not a valid Input")));
       }
     }
-    // ignore: use_build_context_synchronously
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchResult(
-          ethereum: ethadd,
-          client: widget.client,
-        ),
-      ),
+    Navigator.of(context).pushNamed(
+      SearchResult.routeName,
+      arguments: [ethadd, widget.client],
     );
   }
 
@@ -73,11 +108,12 @@ class _SearchUserState extends State<SearchUser> {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           //SEARCH BAR
           Padding(
             padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
             child: TextFormField(
               controller: _searchController,
               onFieldSubmitted: _isTrue,
@@ -101,18 +137,32 @@ class _SearchUserState extends State<SearchUser> {
           ),
 
           //RESULT
-          Padding(
+          Container(
+            width: double.infinity,
             padding:
-                const EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
+                const EdgeInsets.symmetric(vertical: 40.0, horizontal: 50.0),
             child: ElevatedButton(
               onPressed: () async {
                 _isTrue(_searchController.text);
               },
-              child: const Row(
+              style: const ButtonStyle(
+                padding: MaterialStatePropertyAll(
+                  EdgeInsets.symmetric(vertical: 15.0),
+                ),
+              ),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Icon(Icons.person_search_outlined),
-                  Text("Search"),
+                  Icon(
+                    Icons.person_search_outlined,
+                    color: Colors.red[400],
+                  ),
+                  Text(
+                    "Search",
+                    style: TextStyle(
+                      color: Colors.red[400],
+                    ),
+                  ),
                 ],
               ),
             ),
