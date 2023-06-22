@@ -54,8 +54,7 @@ extension XmtpToDbMessage on xmtp.DecodedMessage {
 
 /// Adapts a [db.Message] into an [xmtp.DecodedMessage] for display.
 extension DbToXmtpMessage on db.Message {
-  Future<xmtp.DecodedMessage> toXmtp(
-      xmtp.Codec<xmtp.DecodedContent> decoder) async {
+  Future<dynamic> toXmtp(xmtp.Codec<xmtp.DecodedContent> decoder) async {
     // We do not store the decoded content.
     // Instead we must decode it when we load from the DB for display.
     var encodedParsed = xmtp.EncodedContent.fromBuffer(encoded);

@@ -145,20 +145,20 @@ class Database extends _$Database {
         .map((convo) => convo.toXmtp());
   }
 
+  ///
   /// List messages in the conversation.
-  MultiSelectable<xmtp.DecodedMessage> selectMessages(String topic) =>
-      (messages.select()
-            ..where((msg) => msg.topic.equals(topic))
-            ..orderBy([
-              (msg) => OrderingTerm(
-                    expression: msg.sentAt,
-                    mode: OrderingMode.desc,
-                  )
-            ]))
-          .asyncMap((msg) async => msg.toXmtp(codecs));
+  MultiSelectable<dynamic> selectMessages(String topic) => (messages.select()
+        ..where((msg) => msg.topic.equals(topic))
+        ..orderBy([
+          (msg) => OrderingTerm(
+                expression: msg.sentAt,
+                mode: OrderingMode.desc,
+              )
+        ]))
+      .asyncMap((msg) async => msg.toXmtp(codecs));
 
   /// Select the last message in the conversation.
-  SingleOrNullSelectable<xmtp.DecodedMessage> selectLastMessage(String topic) =>
+  SingleOrNullSelectable<dynamic> selectLastMessage(String topic) =>
       (messages.select()
             ..where((msg) => msg.topic.equals(topic))
             ..orderBy([

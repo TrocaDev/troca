@@ -214,6 +214,7 @@ class BackgroundManager {
         var convo = await _db.selectConversation(msg.topic).getSingleOrNull();
         _refreshMessages([convo!]);
       }
+      print(msg);
       _db.saveMessages([msg]);
     }, onError: (e) {
       _stopMessageStream();

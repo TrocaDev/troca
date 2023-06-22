@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:troca/screens/authentication/test_chat.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -55,7 +56,7 @@ class SearchResult extends StatelessWidget {
                           } else {
                             var convo = await client.newConversation(ethereum);
                             Navigator.of(context).pushReplacementNamed(
-                              ChatScreen.routeName,
+                              TestChatScreen.routeName,
                               arguments: [client, convo],
                             );
                           }

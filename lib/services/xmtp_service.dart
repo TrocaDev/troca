@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:troca/models/test_connecter.dart';
 import 'package:troca/screens/authentication/test.dart';
+import 'package:troca/screens/bottom_nav_bar.dart';
 
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
@@ -45,6 +46,7 @@ class XmtpService {
     //Initializing Flutter Secure Storage Instance
     const mySecureStorage = FlutterSecureStorage();
     connector.openWalletApp();
+    connector.openWalletApp();
 
     // ignore: unused_local_variable
     xmtp.Client client;
@@ -58,7 +60,7 @@ class XmtpService {
 
     //NAVIGATING TO NEXT PAGE
     Navigator.of(context).pushNamed(
-      TestScreen.routeName,
+      BottomBar.routeName,
       arguments: client,
     );
   }

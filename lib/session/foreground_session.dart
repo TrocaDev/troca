@@ -71,11 +71,10 @@ class ForegroundSession extends ChangeNotifier {
       _db.selectConversations().watch();
 
   /// Finds the [xmtp.DecodedMessage]s for the given [topic] in our local database.
-  Future<List<xmtp.DecodedMessage>> findMessages(String topic) =>
-      _db.selectMessages(topic).get();
+  Future<dynamic> findMessages(String topic) => _db.selectMessages(topic).get();
 
   /// Watch a stream that emits the list of messages in the [topic] conversation.
-  Stream<List<xmtp.DecodedMessage>> watchMessages(String topic) =>
+  Stream<dynamic> watchMessages(String topic) =>
       _db.selectMessages(topic).watch();
 
   /// Finds the [xmtp.Conversation] for the given [topic] in our local database.

@@ -3,6 +3,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:troca/Int_codec.dart';
+import 'package:troca/attachment_codec.dart';
 import 'package:troca/models/wallet.dart';
 import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
@@ -112,8 +114,12 @@ class _AuthScreenState extends State<AuthScreen> {
                                 debugLogRequests: kDebugMode,
                                 appVersion: "dev/0.0.0-development",
                               );
-                              var client =
-                                  await xmtp.Client.createFromKeys(api, keys);
+                              var client = await xmtp.Client.createFromKeys(
+                                  api, keys,
+                                  customCodecs: [
+                                    AttachmentCodec(),
+                                    IntegerCodec(),
+                                  ]);
                               // await session.authorizeLogin(client);
                               await session.testAuthorize(client);
 
