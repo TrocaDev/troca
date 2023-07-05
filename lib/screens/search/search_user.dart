@@ -1,11 +1,17 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:troca/screens/search/search_result.dart';
+import 'package:go_router/go_router.dart';
+
 import 'package:ethereum_addresses/ethereum_addresses.dart';
-import 'package:xmtp/xmtp.dart' as xmtp;
+import 'package:troca/session/foreground_session.dart';
+import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:ens_dart/ens_dart.dart';
+import 'package:dotenv/dotenv.dart' as env;
+import 'package:http/http.dart';
+import 'package:web_socket_channel/io.dart';
 
 //MOCK API
 
@@ -57,9 +63,7 @@ Future<String> findPhoneNumber(String phoneNumber) async {
 //UI
 class SearchUser extends StatefulWidget {
   static const routeName = "/search-user";
-  const SearchUser({super.key, required this.client});
-
-  final xmtp.Client client;
+  const SearchUser({super.key});
 
   @override
   State<SearchUser> createState() => _SearchUserState();
@@ -70,23 +74,27 @@ class _SearchUserState extends State<SearchUser> {
   TextEditingController _searchController = TextEditingController();
 
   Future<void> _isTrue(String address) async {
+    setState(() {
+      _isLoading = true;
+    });
     String ethadd = "";
     //Checking if provided string is ehtereum address
     if (isValidEthereumAddress(address) == true) {
       //checking if you can message the address
-      bool _temp = await widget.client.canMessage(address);
+      bool _temp = await session.canMessage(address);
       if (_temp == true) {
         ethadd = address;
       }
     }
+
     //check for phone number
-    else {
+    else if (address.startsWith('+')) {
       var phoneNumber = address;
       address = await findPhoneNumber(phoneNumber);
       //Process if phone number is valid
       if (isValidEthereumAddress(address) == true) {
         //checking if you can message the address
-        bool _temp = await widget.client.canMessage(address);
+        bool _temp = await session.canMessage(address);
         if (_temp == true) {
           ethadd = address;
         }
@@ -97,78 +105,103 @@ class _SearchUserState extends State<SearchUser> {
             .showSnackBar(const SnackBar(content: Text("Not a valid Input")));
       }
     }
-    Navigator.of(context).pushReplacementNamed(
-      SearchResult.routeName,
-      arguments: [ethadd, widget.client],
-    );
+    //Checking for ens domains
+    else {
+      env.load('../.env');
+      final infuraKey = env.env['ea95c129edfd4d2990138f7ec98619f6'];
+
+      final rpcUrl =
+          'https://mainnet.infura.io/v3/ea95c129edfd4d2990138f7ec98619f6';
+      final wsUrl =
+          'wss://mainnet.infura.io/ws/v3/ea95c129edfd4d2990138f7ec98619f6';
+
+      final client = Web3Client(rpcUrl, Client(), socketConnector: () {
+        return IOWebSocketChannel.connect(wsUrl).cast<String>();
+      });
+
+      final ens = Ens(client: client);
+
+      var x = await ens.withName(address).getAddress();
+      if (x.toString() != "0x0000000000000000000000000000000000000000") {
+        ethadd = x.toString();
+      }
+    }
+    GoRouter.of(context).pushNamed("/search-result-screen/${ethadd}");
   }
+
+  //Variables
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          //SEARCH BAR
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
-            child: TextFormField(
-              controller: _searchController,
-              onFieldSubmitted: _isTrue,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.pink[50],
-                hintText: "Ethereum address, Phone Number or Name",
-                hintStyle: const TextStyle(color: Colors.pink),
-                labelText: 'Search User',
-                labelStyle: const TextStyle(color: Colors.pink),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search_rounded,
-                  color: Colors.pink,
-                ),
-              ),
-            ),
-          ),
-
-          //RESULT
-          Container(
-            width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(vertical: 40.0, horizontal: 50.0),
-            child: ElevatedButton(
-              onPressed: () async {
-                _isTrue(_searchController.text);
-              },
-              style: const ButtonStyle(
-                padding: MaterialStatePropertyAll(
-                  EdgeInsets.symmetric(vertical: 15.0),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(
-                    Icons.person_search_outlined,
-                    color: Colors.red[400],
-                  ),
-                  Text(
-                    "Search",
-                    style: TextStyle(
-                      color: Colors.red[400],
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                //SEARCH BAR
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 20.0, horizontal: 15.0),
+                  child: TextFormField(
+                    controller: _searchController,
+                    onFieldSubmitted: _isTrue,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.pink[50],
+                      hintText: "Ethereum address, Phone Number, ENS Name",
+                      hintStyle: const TextStyle(color: Colors.pink),
+                      labelText: 'Search User',
+                      labelStyle: const TextStyle(color: Colors.pink),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: Colors.pink,
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                //RESULT
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 40.0, horizontal: 50.0),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      _isTrue(_searchController.text);
+                    },
+                    style: const ButtonStyle(
+                      padding: MaterialStatePropertyAll(
+                        EdgeInsets.symmetric(vertical: 15.0),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Icon(
+                          Icons.person_search_outlined,
+                          color: Colors.red[400],
+                        ),
+                        Text(
+                          "Search",
+                          style: TextStyle(
+                            color: Colors.red[400],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
     );
   }
 }

@@ -3,10 +3,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:troca/Int_codec.dart';
-import 'package:troca/attachment_codec.dart';
-import 'package:troca/models/wallet.dart';
-import 'package:troca/screens/bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:troca/utils/Int_codec.dart';
+import 'package:troca/utils/attachment_codec.dart';
+import 'package:troca/routes/app_route_constants.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import '../../models/ethereum_connecter.dart';
@@ -22,7 +22,7 @@ enum ConnectionState {
 }
 
 class AuthScreen extends StatefulWidget {
-  static const routeName = "/authscreen";
+  static const routeName = '/authscreen';
   const AuthScreen({Key? key}) : super(key: key);
 
   @override
@@ -88,8 +88,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () async {
-                            // ignore: prefer_const_declarations
-
                             ///**Searching for Stored keys
                             const mySecureStorage = FlutterSecureStorage();
                             var x =
@@ -97,6 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             if (x == null || x.isEmpty) {
                               //**IMPLEMENTATION IF USER ISN'T LOGGED IN */
                               debugPrint("Login");
+
                               _action(context, state: _state);
                               print(_state);
                             } else {
@@ -106,6 +105,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               });
                               var keys = xmtp.PrivateKeyBundle.fromJson(x);
                               debugPrint("$keys");
+
                               //Explicitly defining APIs
                               var api = xmtp.Api.create(
                                 host: 'dev.xmtp.network',
@@ -120,7 +120,6 @@ class _AuthScreenState extends State<AuthScreen> {
                                     AttachmentCodec(),
                                     IntegerCodec(),
                                   ]);
-                              // await session.authorizeLogin(client);
                               await session.testAuthorize(client);
 
                               print("TEST SCREEN");
@@ -128,10 +127,18 @@ class _AuthScreenState extends State<AuthScreen> {
                                 isLoading = !isLoading;
                               });
                               //Navigating to next page
-                              Navigator.of(context).pushNamed(
-                                BottomBar.routeName,
-                                arguments: client,
+                              //
+                              // Navigator.of(context).pushNamed(
+                              //   BottomBar.routeName,
+                              //   arguments: client,
+                              // );
+
+                              GoRouter.of(context).pushNamed(
+                                TrocaRouteConstants.bottomBarRoute,
+                                extra: client,
                               );
+
+                              ///
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -194,7 +201,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // NAVIGATE TO NEXT PAGE
   void _openWalletPage() {
-    Navigator.of(context).pushNamed(WalletPage.routeName, arguments: connector);
+    // Navigator.of(context).pushNamed(WalletPage.routeName, arguments: connector);
+    GoRouter.of(context)
+        .pushNamed(TrocaRouteConstants.walletPageRoute, extra: connector);
   }
 
   // AUTHENTICATE DAPP USING WALLETS(METAMASK)

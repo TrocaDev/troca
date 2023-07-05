@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:troca/attachment_codec.dart';
 
 class MessageBubble extends StatelessWidget {
   MessageBubble(

@@ -1,18 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:troca/screens/authentication/test_chat.dart';
-import 'package:xmtp/xmtp.dart' as xmtp;
+import 'package:go_router/go_router.dart';
+import 'package:troca/session/foreground_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../chat/chat_screen.dart';
+import '../../routes/app_route_constants.dart';
 
 class SearchResult extends StatelessWidget {
   static const routeName = "/search-result";
-  const SearchResult({super.key, required this.ethereum, required this.client});
+  const SearchResult({super.key, required this.ethereum});
   final String ethereum;
-
-  final xmtp.Client client;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +19,7 @@ class SearchResult extends StatelessWidget {
       body: Column(
         children: [
           ethereum == ""
-              ? const Text("NOT A VALID INPUT")
+              ? Center(child: Text("NOT A VALID ADDRESS : $ethereum"))
               : Column(
                   children: [
                     const Text("Start a conversation with"),
@@ -47,17 +45,29 @@ class SearchResult extends StatelessWidget {
                               await mySecureStorage.read(key: ethereum);
                           if (conversationId != null &&
                               conversationId.isNotEmpty) {
-                            var convo = await client.newConversation(ethereum,
+                            var convo = await session.newConversation(ethereum,
                                 conversationId: conversationId);
-                            Navigator.of(context).pushNamed(
-                              ChatScreen.routeName,
-                              arguments: [client, convo],
+                            var conversation =
+                                await session.findConversation(convo);
+                            // Navigator.of(context).pushNamed(
+                            //   TestChatScreen.routeName,
+                            //   arguments: [conversation],
+                            // );
+                            GoRouter.of(context).pushReplacementNamed(
+                              TrocaRouteConstants.testChatScreenRoute,
+                              extra: conversation,
                             );
                           } else {
-                            var convo = await client.newConversation(ethereum);
-                            Navigator.of(context).pushReplacementNamed(
-                              TestChatScreen.routeName,
-                              arguments: [client, convo],
+                            var convo = await session.newConversation(ethereum);
+                            var conversation =
+                                await session.findConversation(convo);
+                            // Navigator.of(context).pushReplacementNamed(
+                            //   TestChatScreen.routeName,
+                            //   arguments: [conversation],
+                            // );
+                            GoRouter.of(context).pushReplacementNamed(
+                              TrocaRouteConstants.testChatScreenRoute,
+                              extra: conversation,
                             );
                           }
                         },

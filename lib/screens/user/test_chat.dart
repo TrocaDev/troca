@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:troca/attachment_codec.dart';
+import 'package:troca/utils/attachment_codec.dart';
 import 'package:troca/screens/chat/message_bubble.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:mime/mime.dart';
@@ -13,10 +13,8 @@ import '../../session/foreground_session.dart';
 
 class TestChatScreen extends StatefulWidget {
   static const routeName = "/test-chat-screen";
-  const TestChatScreen(
-      {super.key, required this.client, required this.conversation});
+  const TestChatScreen({super.key, required this.conversation});
 
-  final xmtp.Client client;
   final xmtp.Conversation conversation;
 
   @override
@@ -145,8 +143,8 @@ class _TestChatScreenState extends State<TestChatScreen> {
                         var ImageData = await pickedImage.readAsBytes();
                         print(lookupMimeType(_pickedImage.path));
 
-                        await widget.client.sendMessage(
-                          widget.conversation,
+                        await session.sendMessage(
+                          widget.conversation.topic,
                           Attachment(
                             filename: _pickedImage.name,
                             mimeType: lookupMimeType(_pickedImage.path)!,
@@ -185,8 +183,8 @@ class _TestChatScreenState extends State<TestChatScreen> {
                         var image = Image.file(file);
                         var message = file.readAsBytesSync();
                         print(lookupMimeType(result.files.single.path!));
-                        await widget.client.sendMessage(
-                          widget.conversation,
+                        await session.sendMessage(
+                          widget.conversation.topic,
                           Attachment(
                             filename: name,
                             mimeType:
@@ -225,8 +223,8 @@ class _TestChatScreenState extends State<TestChatScreen> {
                       if (_controller.text.isEmpty) {
                         return;
                       }
-                      var x = await widget.client.sendMessage(
-                        widget.conversation,
+                      var x = await session.sendMessage(
+                        widget.conversation.topic,
                         _controller.text,
                       );
 

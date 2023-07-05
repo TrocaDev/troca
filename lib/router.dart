@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:troca/models/wallet.dart';
+import 'package:troca/screens/authentication/wallet.dart';
 import 'package:troca/screens/authentication/login_screen.dart';
-import 'package:troca/screens/authentication/test.dart';
+import 'package:troca/screens/user/test.dart';
+import 'package:troca/screens/user/test_chat.dart';
 import 'package:troca/screens/bottom_nav_bar.dart';
 import 'package:troca/screens/chat/chat_screen.dart';
 import 'package:troca/screens/search/search_result.dart';
@@ -48,14 +49,21 @@ Route<dynamic>? generateRoute(RouteSettings routeSettings) {
       );
 
     case ChatScreen.routeName:
-      // Client client = routeSettings.arguments as Client;
-      // Conversation conversation = routeSettings.arguments as Conversation;
       List<dynamic> client = routeSettings.arguments as List<dynamic>;
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => ChatScreen(
           client: client[0],
           conversation: client[1],
+        ),
+      );
+
+    case TestChatScreen.routeName:
+      List<dynamic> client = routeSettings.arguments as List<dynamic>;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => TestChatScreen(
+          conversation: client[0],
         ),
       );
 
@@ -72,25 +80,18 @@ Route<dynamic>? generateRoute(RouteSettings routeSettings) {
       );
 
     case SearchResult.routeName:
-      // Client client = routeSettings.arguments as Client;
-      // String ethereum = routeSettings.arguments as String;
-
       List<dynamic> args = routeSettings.arguments as List<dynamic>;
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => SearchResult(
           ethereum: args[0],
-          client: args[1],
         ),
       );
 
     case SearchUser.routeName:
-      Client client = routeSettings.arguments as Client;
       return MaterialPageRoute(
         settings: routeSettings,
-        builder: (_) => SearchUser(
-          client: client,
-        ),
+        builder: (_) => SearchUser(),
       );
 
     case BottomBar.routeName:

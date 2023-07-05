@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
-import '../codecs.dart';
+import '../utils/codecs.dart';
 import 'adapters.dart';
 import 'isolate.dart';
 

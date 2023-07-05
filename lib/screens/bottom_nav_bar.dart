@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:troca/screens/authentication/test.dart';
+import 'package:troca/screens/qr_code/qr_code.dart';
+import 'package:troca/screens/user/test.dart';
 import 'package:troca/screens/user/user_settings.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class BottomBar extends StatefulWidget {
   static const routeName = "/bottom-bar";
-  const BottomBar({super.key, required this.client});
-
   final xmtp.Client client;
+  const BottomBar({super.key, required this.client});
 
   @override
   State<BottomBar> createState() => _BottomBarState();
@@ -26,8 +26,11 @@ class _BottomBarState extends State<BottomBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-          _page == 0 ? TestScreen(client: widget.client) : const UserSettings(),
+      body: _page == 0
+          ? TestScreen(client: widget.client)
+          : _page == 1
+              ? const UserSettings()
+              : QRCode(),
       bottomNavigationBar: GNav(
         tabs: const [
           GButton(
@@ -35,6 +38,9 @@ class _BottomBarState extends State<BottomBar> {
           ),
           GButton(
             icon: Icons.settings_outlined,
+          ),
+          GButton(
+            icon: Icons.qr_code_2_sharp,
           ),
         ],
         iconSize: 28,

@@ -5,9 +5,9 @@ import 'package:web3dart/credentials.dart';
 import 'package:xmtp/xmtp.dart' as xmtp;
 
 import 'isolate.dart';
-import '../codecs.dart';
+import '../utils/codecs.dart';
 import '../database/database.dart';
-import 'package:troca/api.dart';
+import 'package:troca/utils/api.dart';
 
 final ForegroundSession session = ForegroundSession.create();
 
